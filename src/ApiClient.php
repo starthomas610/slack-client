@@ -285,7 +285,9 @@ class ApiClient
     public function getUsers()
     {
         // get the user list
-        return $this->apiCall('users.list')->then(function (Payload $response) {
+        return $this->apiCall('users.list', [
+            'presence' => 1,
+        ])->then(function (Payload $response) {
             $users = [];
             foreach ($response['members'] as $member) {
                 $users[] = new User($this, $member);
@@ -305,7 +307,6 @@ class ApiClient
     {
         return $this->apiCall('users.info', [
             'user' => $id,
-            'presence' => 1,
         ])->then(function (Payload $response) {
             return new User($this, $response['user']);
         });

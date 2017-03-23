@@ -475,10 +475,15 @@ class RealTimeClient extends ApiClient
                     $deferred = $this->pendingMessages[$payload['reply_to']];
 
                     // Resolve or reject the promise that was waiting for the reply.
-                    if (isset($payload['ok']) && $payload['ok'] === true) {
-                        $deferred->resolve();
+                    if( $payload['type'] == 'pong' ){
+                        $deferred->resolve($payload['pingID']);
                     } else {
-                        $deferred->reject($payload['error']);
+                        // Resolve or reject the promise that was waiting for the reply.
+                        if (isset($payload['ok']) && $payload['ok'] === true) {
+                            $deferred->resolve();
+                        } else {
+                            $deferred->reject($payload['error']);
+                        }
                     }
 
                     unset($this->pendingMessages[$payload['reply_to']]);

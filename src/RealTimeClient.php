@@ -227,6 +227,27 @@ class RealTimeClient extends ApiClient
         return Promise\resolve($this->groups[$id]);
     }
 
+    public function ping($pingID)
+    {
+        if (!$this->connected) {
+            return Promise\reject(new ConnectionException('Client not connected. Did you forget to call `connect()`?'));
+        }
+
+        $data = [
+             'id' => ++$this->lastMessageId,
+            'type' => 'ping',
+            'pingID' => $pingID
+        ];
+        $this->websocket->send(json_encode($data));
+
+        // Create a deferred object and add ping to pending list so when a
+        // success message arrives, we can de-queue it and resolve the promise.
+        $deferred = new Promise\Deferred();
+        $this->pendingMessages[$this->lastMessageId] = $deferred;
+
+        return $deferred->promise();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -368,7 +389,7 @@ class RealTimeClient extends ApiClient
         // parse the message and get the event name
         $payload = Payload::fromJson($message->getData());
 
-        if (isset($payload['type'])) {
+        if (isset($payload['type']) && $payload['type'] != 'pong') {
             switch ($payload['type']) {
                 case 'hello':
                     $this->connected = true;

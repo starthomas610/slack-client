@@ -305,6 +305,7 @@ class ApiClient
     {
         return $this->apiCall('users.info', [
             'user' => $id,
+            'presence' => 1,
         ])->then(function (Payload $response) {
             return new User($this, $response['user']);
         });

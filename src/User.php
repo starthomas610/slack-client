@@ -172,6 +172,11 @@ class User extends ClientObject
         return $this->data['profile']['image_48'];
     }
 
+    public function getPresenceString()
+    {
+        return $this->data['presence'];
+    }
+
     /**
      * User profile image URL 72x72px
      *

@@ -17,9 +17,10 @@ class Attachment extends DataObject
      * @param string $text     The attachment body text.
      * @param string $fallback A plain-text summary of the attachment.
      */
-    public function __construct($title, $text, $fallback = null, $color = null, $pretext = null, array $fields = [])
+    public function __construct($title, $text, $fallback = null, $color = null, $pretext = null, array $fields = [], $titleLink = '')
     {
         $this->data['title'] = $title;
+        $this->data['title_link'] = $titleLink;
         $this->data['text'] = $text;
         $this->data['fallback'] = $fallback ?: $text;
         $this->data['color'] = $color;

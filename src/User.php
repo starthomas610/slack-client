@@ -47,6 +47,31 @@ class User extends ClientObject
     {
         return isset($this->data['profile']['last_name']) ? $this->data['profile']['last_name'] : null;
     }
+        
+    public function getTimezoneOffset()
+    {
+        return $this->data['tz_offset'];
+    }
+
+    public function getTimezone()
+    {
+        return $this->data['tz'];
+    }
+
+    public function isBot()
+    {
+        return $this->data['is_bot'];
+    }
+
+    public function isRestricted()
+    {
+        return $this->data['is_restricted'];
+    }
+
+    public function isUltraRestricted()
+    {
+        return $this->data['is_ultra_restricted'];
+    }
 
     /**
      * Gets the user's real name if supplied.

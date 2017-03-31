@@ -278,6 +278,22 @@ class ApiClient
     }
 
     /**
+     * Gets the presence for a user by ID
+     *
+     * @param string $id A user ID.
+     *
+     * @return \React\Promise\PromiseInterface A promise for a user object.
+     */
+    public function getUserPresenceById($id)
+    {
+        return $this->apiCall('users.getPresence', [
+            'user' => $id,
+        ])->then(function (Payload $response) {
+            return $response['presence'];
+        });
+    }
+
+    /**
      * Gets all users in the Slack team.
      *
      * @return \React\Promise\PromiseInterface A promise for an array of users.

@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org).
 
+## [0.2.6] - 2018-01-22
+### Added
+- A parameter to connect() to allow you to subscribe to batch presence changes
+- A method subscribeToPresence() to subscribe to presence changes for the given slackIDs
+
 ## [0.2.5] - 2016-09-21
 ### Added
 - You can now check if a `RealTimeClient` is currently connected with a `isConnected()` method.

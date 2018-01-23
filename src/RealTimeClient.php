@@ -69,7 +69,7 @@ class RealTimeClient extends ApiClient
      * Connects to the real-time messaging server.
      *
      * @param bool $batchPresenceAware wether or not to allow subscribing to batch precense changes. If you set this,
-     *                                 you can then use $slackClient->websocket->send(json_encode(['type' => 'presence_sub', 'ids' => ['U6YQSDWGM']]));
+     *                                 you can then use $slackClient->subscribeToPresence(['blahblah']);
      *                                 to subscribe to the presence events
      * @return \React\Promise\PromiseInterface
      */

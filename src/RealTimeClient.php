@@ -68,14 +68,17 @@ class RealTimeClient extends ApiClient
     /**
      * Connects to the real-time messaging server.
      *
+     * @param bool $batchPresenceAware wether or not to allow subscribing to batch precense changes. If you set this,
+     *                                 you can then use $slackClient->websocket->send(json_encode(['type' => 'presence_sub', 'ids' => ['U6YQSDWGM']]));
+     *                                 to subscribe to the presence events
      * @return \React\Promise\PromiseInterface
      */
-    public function connect()
+    public function connect($batchPresenceAware = false)
     {
         $deferred = new Promise\Deferred();
 
         // Request a real-time connection...
-        $this->apiCall('rtm.start')
+        $this->apiCall('rtm.start', ['batch_presence_aware' => $batchPresenceAware, 'presence_sub' => $batchPresenceAware])
 
         // then connect to the socket...
         ->then(function (Payload $response) {
@@ -377,6 +380,16 @@ class RealTimeClient extends ApiClient
     public function isConnected()
     {
         return $this->connected;
+    }
+
+    /**
+     * Subscribe to presence change events for the given users
+     *
+     * @param string[] $userIDs
+     */
+    public function subscribeToPresence($userIDs)
+    {
+        $this->websocket->send(json_encode(['type' => 'presence_sub', 'ids' => $userIDs]));
     }
 
     /**

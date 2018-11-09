@@ -422,26 +422,26 @@ class RealTimeClient extends ApiClient
                     break;
 
                 case 'channel_created':
-                    $this->getChannelById($payload['channel']['id'])->then(function (Channel $channel) {
+                    $this->getChannelById($payload['channel'])->then(function (Channel $channel) {
                         $this->channels[$channel->getId()] = $channel;
                     });
                     break;
 
                 case 'channel_deleted':
-                    unset($this->channels[$payload['channel']['id']]);
+                    unset($this->channels[$payload['channel']]);
                     break;
 
                 case 'channel_rename':
-                    $this->channels[$payload['channel']['id']]->data['name']
+                    $this->channels[$payload['channel']]->data['name']
                         = $payload['channel']['name'];
                     break;
 
                 case 'channel_archive':
-                    $this->channels[$payload['channel']['id']]->data['is_archived'] = true;
+                    $this->channels[$payload['channel']]->data['is_archived'] = true;
                     break;
 
                 case 'channel_unarchive':
-                    $this->channels[$payload['channel']['id']]->data['is_archived'] = false;
+                    $this->channels[$payload['channel']]->data['is_archived'] = false;
                     break;
 
                 case 'group_joined':

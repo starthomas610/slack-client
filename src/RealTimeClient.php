@@ -90,30 +90,40 @@ class RealTimeClient extends ApiClient
             $this->users[$responseData['self']['id']] = new User($this, $responseData['self']);
 
             // populate list of users
-            foreach ($responseData['users'] as $data) {
-                $this->users[$data['id']] = new User($this, $data);
+            $users = $this->getUsers();
+            foreach ($users as $user) {
+                $this->users[$user['id']] = $user;
             }
-
+        })
+        ->then(function () {
             // populate list of channels
-            foreach ($responseData['channels'] as $data) {
-                $this->channels[$data['id']] = new Channel($this, $data);
+            $channels = $this->getChannels();
+            foreach ($channels as $channel) {
+                $this->channels[$channel['id']] = $channel;
             }
-
+        })
+        ->then(function () {
             // populate list of groups
-            foreach ($responseData['groups'] as $data) {
-                $this->groups[$data['id']] = new Group($this, $data);
+            $groups = $this->getGroups();
+            foreach ($groups as $group) {
+                $this->groups[$group['id']] = $group;
             }
-
+        })
+        ->then(function () {
             // populate list of dms
-            foreach ($responseData['ims'] as $data) {
-                $this->dms[$data['id']] = new DirectMessageChannel($this, $data);
+            $dms = $this->getDMs();
+            foreach ($dms as $dm) {
+                $this->dms[$dm['id']] = $dm;
             }
-
+        })
+        ->then(function () {
             // populate list of bots
-            foreach ($responseData['bots'] as $data) {
-                $this->bots[$data['id']] = new Bot($this, $data);
+            $bots = $this->getBots();
+            foreach ($bots as $bot) {
+                $this->bots[$bot['id']] = $bot;
             }
-
+        })
+        ->then (function () {
             // Log PHPWS things to stderr
             $logger = new \Zend\Log\Logger();
             $logger->addWriter(new \Zend\Log\Writer\Stream('php://stderr'));

@@ -78,7 +78,7 @@ class RealTimeClient extends ApiClient
         $deferred = new Promise\Deferred();
 
         // Request a real-time connection...
-        $this->apiCall('rtm.start', ['batch_presence_aware' => $batchPresenceAware, 'presence_sub' => $batchPresenceAware])
+        $this->apiCall('rtm.connect', ['batch_presence_aware' => $batchPresenceAware, 'presence_sub' => $batchPresenceAware])
 
         // then connect to the socket...
         ->then(function (Payload $response) {

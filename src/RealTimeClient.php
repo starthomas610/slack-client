@@ -89,6 +89,10 @@ class RealTimeClient extends ApiClient
             // Populate self user.
             $this->users[$responseData['self']['id']] = new User($this, $responseData['self']);
 
+            // Save websocket url.
+            $this->websocketUrl = $responseData['url'];
+        })
+        ->then(function () {
             // populate list of users
             $users = $this->getUsers();
             foreach ($users as $user) {
@@ -129,7 +133,7 @@ class RealTimeClient extends ApiClient
             $logger->addWriter(new \Zend\Log\Writer\Stream('php://stderr'));
 
             // initiate the websocket connection
-            $this->websocket = new WebSocket($responseData['url'], $this->loop, $logger);
+            $this->websocket = new WebSocket($this->websocketUrl, $this->loop, $logger);
             $this->websocket->on('message', function ($message) {
                 $this->onMessage($message);
             });

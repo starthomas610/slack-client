@@ -90,22 +90,6 @@ class ApiClient
     }
 
     /**
-     * Gets a list of bots.
-     *
-     * @return \React\Promise\PromiseInterface
-     */
-    public function getBots()
-    {
-        return $this->apiCall('bots.info')->then(function (Payload $response) {
-            $bots = [];
-            foreach ($response['bot'] as $bot) {
-                $bots[] = new Bot($this, $bot);
-            }
-            return $bots;
-        });
-    }
-
-    /**
      * Gets a channel, group, or DM channel by ID.
      *
      * @param string $id The channel ID.

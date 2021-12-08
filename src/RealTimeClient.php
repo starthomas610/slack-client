@@ -94,38 +94,23 @@ class RealTimeClient extends ApiClient
         })
         ->then(function () {
             // populate list of users
-            $users = $this->getUsers();
-            foreach ($users as $user) {
-                $this->users[$user['id']] = $user;
-            }
+            $this->fetchUsers();
         })
         ->then(function () {
             // populate list of channels
-            $channels = $this->getChannels();
-            foreach ($channels as $channel) {
-                $this->channels[$channel['id']] = $channel;
-            }
+            $this->fetchChannels();
         })
         ->then(function () {
             // populate list of groups
-            $groups = $this->getGroups();
-            foreach ($groups as $group) {
-                $this->groups[$group['id']] = $group;
-            }
+            $this->fetchGroups();
         })
         ->then(function () {
             // populate list of dms
-            $dms = $this->getDMs();
-            foreach ($dms as $dm) {
-                $this->dms[$dm['id']] = $dm;
-            }
+            $this->fetchDMs();
         })
         ->then(function () {
             // populate list of bots
-            $bots = $this->getBots();
-            foreach ($bots as $bot) {
-                $this->bots[$bot['id']] = $bot;
-            }
+            $this->fetchBots();
         })
         ->then (function () {
             // Log PHPWS things to stderr
@@ -353,6 +338,57 @@ class RealTimeClient extends ApiClient
         }
 
         return Promise\resolve($this->bots[$id]);
+    }
+
+    public function fetchUsers()
+    {
+        $this->apiCall('users.list', [
+            'presence' => 1,
+        ])->then(function (Payload $response) {
+            foreach ($response['members'] as $user) {
+                $this->users[$user['id']] = new User($this, $user);
+            }
+        });
+    }
+
+    public function fetchDMs()
+    {
+        $this->apiCall('conversations.list', [
+            'type' => 'ims'
+        ])->then(function ($response) {
+            foreach ($response['ims'] as $dm) {
+                $this->dms[$dm['id']] = new DirectMessageChannel($this, $dm);
+            }
+        });
+    }
+
+    public function fetchChannels()
+    {
+        return $this->apiCall('conversations.list', [
+            'types' => 'private.channel,public.channel'
+        ])->then(function ($response) {
+            foreach ($response['channels'] as $channel) {
+                $this->channels[$channel['id']] = new Channel($this, $channel);
+            }
+        });
+    }
+
+    public function fetchBots()
+    {
+        $this->apiCall('bots.info')->then(function (Payload $response) {
+            foreach ($response as $bot) {
+                $this->bots[$bot['id']] = new Bot($this, $bot);
+            }
+        });
+    }
+
+    public function fetchGroups()
+    {
+        $this->apiCall('groups.list')->then(function ($response) {
+            foreach ($response['groups'] as $group) {
+                $this->groups[$group['id']] = new Group($this, $group);
+            }
+        });
     }
 
     /**

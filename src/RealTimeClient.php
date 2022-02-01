@@ -78,7 +78,7 @@ class RealTimeClient extends ApiClient
         $deferred = new Promise\Deferred();
 
         // Request a real-time connection...
-        $this->apiCall('rtm.start', ['batch_presence_aware' => $batchPresenceAware, 'presence_sub' => $batchPresenceAware])
+        $this->apiCall('rtm.connect', ['batch_presence_aware' => $batchPresenceAware, 'presence_sub' => $batchPresenceAware])
 
         // then connect to the socket...
         ->then(function (Payload $response) {
@@ -89,37 +89,36 @@ class RealTimeClient extends ApiClient
             // Populate self user.
             $this->users[$responseData['self']['id']] = new User($this, $responseData['self']);
 
+            // Save websocket url.
+            $this->websocketUrl = $responseData['url'];
+        })
+        ->then(function () {
             // populate list of users
-            foreach ($responseData['users'] as $data) {
-                $this->users[$data['id']] = new User($this, $data);
-            }
-
+            $this->fetchUsers();
+        })
+        ->then(function () {
             // populate list of channels
-            foreach ($responseData['channels'] as $data) {
-                $this->channels[$data['id']] = new Channel($this, $data);
-            }
-
+            $this->fetchChannels();
+        })
+        ->then(function () {
             // populate list of groups
-            foreach ($responseData['groups'] as $data) {
-                $this->groups[$data['id']] = new Group($this, $data);
-            }
-
+            $this->fetchGroups();
+        })
+        ->then(function () {
             // populate list of dms
-            foreach ($responseData['ims'] as $data) {
-                $this->dms[$data['id']] = new DirectMessageChannel($this, $data);
-            }
-
+            $this->fetchDMs();
+        })
+        ->then(function () {
             // populate list of bots
-            foreach ($responseData['bots'] as $data) {
-                $this->bots[$data['id']] = new Bot($this, $data);
-            }
-
+            $this->fetchBots();
+        })
+        ->then (function () {
             // Log PHPWS things to stderr
             $logger = new \Zend\Log\Logger();
             $logger->addWriter(new \Zend\Log\Writer\Stream('php://stderr'));
 
             // initiate the websocket connection
-            $this->websocket = new WebSocket($responseData['url'], $this->loop, $logger);
+            $this->websocket = new WebSocket($this->websocketUrl, $this->loop, $logger);
             $this->websocket->on('message', function ($message) {
                 $this->onMessage($message);
             });
@@ -339,6 +338,57 @@ class RealTimeClient extends ApiClient
         }
 
         return Promise\resolve($this->bots[$id]);
+    }
+
+    public function fetchUsers()
+    {
+        $this->apiCall('users.list', [
+            'presence' => 1,
+        ])->then(function (Payload $response) {
+            foreach ($response['members'] as $user) {
+                $this->users[$user['id']] = new User($this, $user);
+            }
+        });
+    }
+
+    public function fetchDMs()
+    {
+        $this->apiCall('conversations.list', [
+            'type' => 'ims'
+        ])->then(function ($response) {
+            foreach ($response['ims'] as $dm) {
+                $this->dms[$dm['id']] = new DirectMessageChannel($this, $dm);
+            }
+        });
+    }
+
+    public function fetchChannels()
+    {
+        return $this->apiCall('conversations.list', [
+            'types' => 'private.channel,public.channel'
+        ])->then(function ($response) {
+            foreach ($response['channels'] as $channel) {
+                $this->channels[$channel['id']] = new Channel($this, $channel);
+            }
+        });
+    }
+
+    public function fetchBots()
+    {
+        $this->apiCall('bots.info')->then(function (Payload $response) {
+            foreach ($response as $bot) {
+                $this->bots[$bot['id']] = new Bot($this, $bot);
+            }
+        });
+    }
+
+    public function fetchGroups()
+    {
+        $this->apiCall('groups.list')->then(function ($response) {
+            foreach ($response['groups'] as $group) {
+                $this->groups[$group['id']] = new Group($this, $group);
+            }
+        });
     }
 
     /**

@@ -116,7 +116,9 @@ class ApiClient
      */
     public function getChannels()
     {
-        return $this->apiCall('channels.list')->then(function ($response) {
+        return $this->apiCall('conversations.list', [
+            'types' => 'private.channel,public.channel'
+        ])->then(function ($response) {
             $channels = [];
             foreach ($response['channels'] as $channel) {
                 $channels[] = new Channel($this, $channel);
@@ -220,7 +222,9 @@ class ApiClient
      */
     public function getDMs()
     {
-        return $this->apiCall('im.list')->then(function ($response) {
+        return $this->apiCall('conversations.list', [
+            'type' => 'ims'
+        ])->then(function ($response) {
             $dms = [];
             foreach ($response['ims'] as $dm) {
                 $dms[] = new DirectMessageChannel($this, $dm);
